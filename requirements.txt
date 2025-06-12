@@ -2,5 +2,5 @@ livekit-agents[openai]
 livekit-plugins-noise-cancellation
 python-dotenv
 asyncpg
-psycopg2
+psycopg2-binary
 streamlit
