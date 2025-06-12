@@ -1,0 +1,4 @@
+livekit-agents[openai]
+livekit-plugins-noise-cancellation
+python-dotenv
+asyncpg
