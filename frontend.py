@@ -35,8 +35,8 @@ def fetch_data():
         if conn:
             query = """
             SELECT pin, name, phone_number, account_status, password, 
-                   postal_code, date_of_birth, sin_last_three, location, 
-                   issue_type, created_at, updated_at
+                   postal_code, date_of_birth, sin_last_three, 
+                   created_at, updated_at
             FROM user_data 
             ORDER BY created_at DESC
             """
@@ -58,9 +58,8 @@ def insert_data(data):
             
             insert_query = """
             INSERT INTO user_data (pin, name, phone_number, account_status, password, 
-                                 postal_code, date_of_birth, sin_last_three, location, 
-                                 issue_type)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                 postal_code, date_of_birth, sin_last_three)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             
             cursor.execute(insert_query, data)
@@ -136,12 +135,11 @@ def main():
             st.subheader(f"Total Records: {len(df)}")
             
             # Search functionality
-            search_term = st.text_input("🔍 Search records (by name, phone, or location):")
+            search_term = st.text_input("🔍 Search records (by name or phone):")
             if search_term:
                 mask = (
                     df['name'].str.contains(search_term, case=False, na=False) |
-                    df['phone_number'].str.contains(search_term, case=False, na=False) |
-                    df['location'].str.contains(search_term, case=False, na=False)
+                    df['phone_number'].str.contains(search_term, case=False, na=False)
                 )
                 df = df[mask]
                 st.info(f"Found {len(df)} matching records")
@@ -160,8 +158,6 @@ def main():
                     "postal_code": "Postal Code",
                     "date_of_birth": "DOB",
                     "sin_last_three": "SIN (Last 3)",
-                    "location": "Location",
-                    "issue_type": "Issue Type",
                     "created_at": st.column_config.DatetimeColumn("Created At"),
                     "updated_at": st.column_config.DatetimeColumn("Updated At")
                 }
@@ -211,12 +207,6 @@ def main():
             with col2:
                 date_of_birth = st.date_input("Date of Birth", help="User's birth date")
                 sin_last_three = st.text_input("SIN (Last 3 digits)", max_chars=3, help="Last 3 digits of SIN")
-                location = st.text_input("Location", help="Current location (home/office)")
-                issue_type = st.selectbox(
-                    "Issue Type",
-                    VALID_ISSUE_TYPES,
-                    help="Type of issue - classified by agent"
-                )
             
             submitted = st.form_submit_button("➕ Add Record", type="primary")
             
@@ -226,8 +216,6 @@ def main():
                     st.error("PIN, Name and Phone Number are required fields!")
                 elif sin_last_three and len(sin_last_three) != 3:
                     st.error("SIN last three digits must be exactly 3 characters!")
-                elif issue_type not in VALID_ISSUE_TYPES:
-                    st.error(f"Invalid issue type. Must be one of: {', '.join(VALID_ISSUE_TYPES)}")
                 else:
                     # Prepare data
                     hashed_password = hash_password(password) if password else None
@@ -241,9 +229,7 @@ def main():
                         hashed_password,
                         postal_code,
                         dob_str,
-                        sin_last_three,
-                        location,
-                        issue_type
+                        sin_last_three
                     )
                     
                     if insert_data(data):
@@ -347,13 +333,9 @@ def main():
             status_counts = df['account_status'].value_counts()
             st.bar_chart(status_counts)
             
-            st.subheader("📊 Issue Type Distribution")
-            issue_counts = df['issue_type'].value_counts()
-            st.bar_chart(issue_counts)
-            
             # Recent activity
             st.subheader("🕒 Recent Activity")
-            recent_df = df.head(10)[['name', 'account_status', 'issue_type', 'updated_at']]
+            recent_df = df.head(10)[['name', 'account_status', 'updated_at']]
             st.dataframe(recent_df, use_container_width=True, hide_index=True)
             
             # Updated vs Created comparison
