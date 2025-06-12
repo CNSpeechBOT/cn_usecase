@@ -3,3 +3,4 @@ livekit-plugins-noise-cancellation
 python-dotenv
 asyncpg
 psycopg2
+streamlit
