@@ -216,6 +216,39 @@ def insert_sample_data():
         if 'conn' in locals():
             conn.close()
 
+def drop_columns():
+    """
+    Drop issue_type and location columns from the user_data table.
+    """
+    try:
+        # Connect to the database
+        print("Connecting to the database...")
+        conn = psycopg2.connect(DATABASE_URL)
+        cursor = conn.cursor()
+        
+        # Drop the columns
+        print("Dropping columns...")
+        cursor.execute("ALTER TABLE user_data DROP COLUMN IF EXISTS issue_type;")
+        cursor.execute("ALTER TABLE user_data DROP COLUMN IF EXISTS location;")
+        
+        # Commit the changes
+        conn.commit()
+        print("Columns 'issue_type' and 'location' dropped successfully!")
+        
+    except psycopg2.Error as e:
+        print(f"Database error: {e}")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        
+    finally:
+        # Close the connection
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+        print("Database connection closed.")
+
 if __name__ == "__main__":
     # Create the table with updated schema
     create_table()
@@ -225,3 +258,6 @@ if __name__ == "__main__":
     
     # Uncomment the line below if you want to insert sample data
     # insert_sample_data()
+    
+    # Drop issue_type and location columns
+    drop_columns()
